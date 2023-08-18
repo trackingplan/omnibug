@@ -1,7 +1,7 @@
 {
-    "name": "omnibug",
+    "name": "tp_omnibug",
     "version": "1.21.1",
-    "description": "Omnibug Extension",
+    "description": "Trackingplan Omnibug",
     "main": "Gruntfile.js",
     "scripts": {
         "production": "grunt production",

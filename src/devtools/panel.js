@@ -553,7 +553,25 @@ window.Omnibug = (() => {
     function addRequest(request) {
         noRequests.classList.add("d-none");
         recordedData.push(request);
-        requestPanel.appendChild(buildRequest(request));
+        let requestRow = buildRequest(request);
+        validateRequest(request.request, requestRow);
+        requestPanel.appendChild(requestRow);
+    }
+
+    function validateRequest(request, row){
+        if(Trackingplan.isTrackingplanRequest(request)){
+            row.getElementsByClassName("validation")[0].innerText = ("Checking");
+        } else {
+            row.getElementsByClassName("validation")[0].innerText = ("N/A");
+        }
+        Trackingplan.validateRequest(request).then((result) => {
+            console.log("RESPONSE", result);
+            if(Object.keys(result).length > 0){
+                row.getElementsByClassName("validation")[0].innerText = ("WARN");
+            } else {
+                row.getElementsByClassName("validation")[0].innerText = ("OK");
+            }
+        });
     }
 
     /**
@@ -668,7 +686,7 @@ window.Omnibug = (() => {
                 "children": [colTitleMultipleIcon]
             }),
             colAccount = createElement("div", {
-                "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-5"]
+                "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-4"]
             }),
             requestTypeValue;
 
@@ -729,19 +747,28 @@ window.Omnibug = (() => {
         }
 
         // Add the timestamp
-        let timestamp = new Date(request.request.timestamp).toLocaleString(),
+        let timestamp = new Date(request.request.timestamp).toLocaleString().split(" ")[1],
             colTime = createElement("div", {
-                "classes": ["column", "col-3", "col-lg-4", "col-md-4", "col-sm-2"],
+                "classes": ["column", "col-1", "col-lg-2", "col-md-2", "col-sm-1"],
                 "text": timestamp,
                 "attributes": {
                     "title": timestamp
                 }
             });
+        
+        
+        let colValidation = createElement("div", {
+            "classes": ["column", "col-2", "col-lg-2", "col-md-2", "col-sm-2", "validation"],
+            "text": "WARN",
+            "attributes": {
+                "title": "WARNING",
+            }
+        });
 
         // Wrap everything
         let summaryColumns = createElement("div", {
                 "classes": ["columns"],
-                "children": [colTitleWrapper, colAccount, (includeEventCol ? colEvent : null), colTime]
+                "children": [colTitleWrapper, colAccount, (includeEventCol ? colEvent : null), colTime, colValidation]
             }),
             summaryContainer = createElement("div", {
                 "classes": ["container"],
@@ -749,7 +776,7 @@ window.Omnibug = (() => {
             }),
             summary = createElement("summary", {
                 "children": [summaryContainer]
-            });
+            });    
 
         // Append our summary
         details.appendChild(summary);
