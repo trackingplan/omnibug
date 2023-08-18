@@ -559,19 +559,61 @@ window.Omnibug = (() => {
     }
 
     function validateRequest(request, row){
-        if(Trackingplan.isTrackingplanRequest(request)){
-            row.getElementsByClassName("validation")[0].innerText = ("Checking");
-        } else {
+        if(!Trackingplan.isTrackingplanRequest(request)){
             row.getElementsByClassName("validation")[0].innerText = ("N/A");
+            return;
         }
+
+        row.getElementsByClassName("validation")[0].innerText = ("Checking");
+    
         Trackingplan.validateRequest(request).then((result) => {
-            console.log("RESPONSE", result);
-            if(Object.keys(result).length > 0){
-                row.getElementsByClassName("validation")[0].innerText = ("WARN");
-            } else {
-                row.getElementsByClassName("validation")[0].innerText = ("OK");
-            }
+            row.getElementsByClassName("validation")[0].innerText = "";
+            row.getElementsByClassName("validation")[0].appendChild(getBadgeFromValidationResult(result));
         });
+    }
+
+    function getBadgeFromValidationResult(result){
+        // badge is a rounded bullet that shows the status of the request
+        // it can say N/A with gray background, OK with green background, or WARN with yellow background
+        // we also set different data-tooltip attribute for each case
+
+        let badge = document.createElement("div");
+        badge.classList.add("tp-badge");
+        badge.classList.add("tooltip");
+        badge.classList.add("tooltip-left");
+        
+
+
+
+        console.log("RESPONSE", result);
+        if(Object.keys(result).length > 0){
+            badge.classList.add("tp-badge-warning");
+            badge.innerText = "WARN";
+            //for the data tooltip, we get the values of each item of the object and display new line starting with a bullet of the warning_message value of each one of the items of the object.
+            let tooltip = "";
+            Object.keys(result).forEach((key) => {
+                // replace html tags from the warning message
+                result[key].warning_message = result[key].warning_message.replace(/<[^>]*>?/gm, "").trim();
+                tooltip += "• " + result[key].warning_message + "\n";
+            });
+            badge.setAttribute("data-tooltip", tooltip);
+        } else {
+
+            if(result == []){
+                // its N/A
+                badge.classList.add("tp-badge-info");
+                badge.innerText = "N/A";
+                // we show a tooltip with the reason why it is N/A
+                badge.setAttribute("data-tooltip", "This request is not a Trackingplan request");
+            } else {
+                // its OK
+                badge.classList.add("tp-badge-ok");
+                badge.innerText = "OK";
+                // we show a tooltip with the reason why it is OK
+                badge.setAttribute("data-tooltip", "This request is OK");
+            }
+        }
+        return badge;
     }
 
     /**
@@ -758,10 +800,9 @@ window.Omnibug = (() => {
         
         
         let colValidation = createElement("div", {
-            "classes": ["column", "col-2", "col-lg-2", "col-md-2", "col-sm-2", "validation"],
-            "text": "WARN",
+            "classes": ["col-2", "col-lg-2", "col-md-2", "col-sm-2", "validation"],
+            "text": "",
             "attributes": {
-                "title": "WARNING",
             }
         });
 

@@ -1,8 +1,8 @@
 var Trackingplan = {};
 
 Trackingplan.options = {
-    tpId: "TP269762",
-    validateEndpoint: "https://tracks.trackingplan.com/v1/?skip_ingest=true&validate=true&debug=true"
+    tpId: "TP803257",
+    validateEndpoint: "https://eu-alexandrosandre-tracks.trackingplan.io/v1/?skip_ingest=true&validate=true&debug=true"
 };
 
 Trackingplan.validateRequest = async (extensionRequest, callback) => {
